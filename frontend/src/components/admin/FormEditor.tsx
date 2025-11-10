@@ -210,6 +210,11 @@ export const FormEditor = () => {
                                 </div>
                               ))}
                             </div>
+                          ) : field.type === "file" ? (
+                            <Input
+                              type="file"
+                              disabled
+                            />
                           ) : (
                             <Input
                               type={field.type}

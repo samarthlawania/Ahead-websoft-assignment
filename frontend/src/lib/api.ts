@@ -115,6 +115,34 @@ export const api = {
     },
   },
 
+  // File upload
+  upload: {
+    // Upload file (admin)
+    uploadFile: async (file: File): Promise<{ url: string; filename: string; size: number }> => {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch(`${API_BASE_URL}/admin/upload`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: formData,
+      });
+      return handleResponse(response);
+    },
+
+    // Upload file (public)
+    uploadFilePublic: async (file: File): Promise<{ url: string; filename: string; size: number }> => {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch(`${API_BASE_URL}/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      return handleResponse(response);
+    },
+  },
+
   // Public API calls
   public: {
     // Get public form

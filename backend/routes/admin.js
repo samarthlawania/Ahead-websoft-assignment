@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const Form = require('../models/form');
 const Submission = require('../models/submission');
 const { requireAuth } = require('../middleware/auth');
+const upload = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -192,6 +193,24 @@ router.get('/forms/:id/submissions', async (req, res) => {
         total,
         pages: Math.ceil(total / limit)
       }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/upload - Upload file
+router.post('/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    
+    const fileUrl = `/uploads/${req.file.filename}`;
+    res.json({ 
+      url: fileUrl,
+      filename: req.file.originalname,
+      size: req.file.size
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

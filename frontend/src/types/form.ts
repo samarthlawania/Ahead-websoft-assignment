@@ -6,7 +6,8 @@ export type FieldType =
     | 'date'
     | 'checkbox'
     | 'radio'
-    | 'select';
+    | 'select'
+    | 'file';
 
 export interface FieldValidation {
     min?: number;

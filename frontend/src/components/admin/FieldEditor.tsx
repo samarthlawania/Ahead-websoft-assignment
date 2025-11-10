@@ -69,6 +69,7 @@ export const FieldEditor = ({ fields, setFields, onFieldsChange }: FieldEditorPr
       checkbox: "bg-indigo-100 text-indigo-800",
       radio: "bg-orange-100 text-orange-800",
       select: "bg-cyan-100 text-cyan-800",
+      file: "bg-red-100 text-red-800",
     };
     return colors[type];
   };

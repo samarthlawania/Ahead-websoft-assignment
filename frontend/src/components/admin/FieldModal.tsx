@@ -244,6 +244,7 @@ export const FieldModal = ({
                   <SelectItem value="checkbox">Checkbox</SelectItem>
                   <SelectItem value="radio">Radio</SelectItem>
                   <SelectItem value="select">Select</SelectItem>
+                  <SelectItem value="file">File Upload</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -314,6 +315,7 @@ export const FieldModal = ({
                                     <SelectItem value="checkbox">Checkbox</SelectItem>
                                     <SelectItem value="radio">Radio</SelectItem>
                                     <SelectItem value="select">Select</SelectItem>
+                                    <SelectItem value="file">File Upload</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <Button

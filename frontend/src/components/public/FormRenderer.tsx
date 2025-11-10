@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -267,6 +267,31 @@ export const FormRenderer = () => {
                     </div>
                   ))}
                 </div>
+              ) : nestedField.type === "file" ? (
+                <div className="space-y-2">
+                  <Input
+                    id={nestedFieldName}
+                    type="file"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        try {
+                          const result = await api.upload.uploadFilePublic(file);
+                          handleFieldChange(nestedFieldName, result.url);
+                        } catch (error) {
+                          console.error('Upload failed:', error);
+                        }
+                      }
+                    }}
+                    className={nestedError ? "border-destructive" : ""}
+                  />
+                  {nestedValue && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Upload className="h-4 w-4" />
+                      <span>File uploaded</span>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <Input
                   id={nestedFieldName}
@@ -381,6 +406,31 @@ export const FormRenderer = () => {
                 </label>
               </div>
             ))}
+          </div>
+        ) : field.type === "file" ? (
+          <div className="space-y-2">
+            <Input
+              id={field.name}
+              type="file"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  try {
+                    const result = await api.upload.uploadFilePublic(file);
+                    handleFieldChange(field.name, result.url);
+                  } catch (error) {
+                    console.error('Upload failed:', error);
+                  }
+                }
+              }}
+              className={error ? "border-destructive" : ""}
+            />
+            {value && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Upload className="h-4 w-4" />
+                <span>File uploaded</span>
+              </div>
+            )}
           </div>
         ) : (
           <Input

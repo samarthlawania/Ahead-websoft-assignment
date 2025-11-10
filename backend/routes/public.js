@@ -2,6 +2,7 @@ const express = require('express');
 const Form = require('../models/form');
 const Submission = require('../models/submission');
 const { validateSubmission } = require('../utils/validation');
+const upload = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -45,6 +46,24 @@ router.post('/forms/:id/submissions', async (req, res) => {
     await submission.save();
     
     res.status(201).json({ id: submission._id });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/upload - Public file upload
+router.post('/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    
+    const fileUrl = `/uploads/${req.file.filename}`;
+    res.json({ 
+      url: fileUrl,
+      filename: req.file.originalname,
+      size: req.file.size
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

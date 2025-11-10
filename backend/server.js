@@ -2,9 +2,16 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
 const adminRoutes = require('./routes/admin');
 const publicRoutes = require('./routes/public');
 const authRoutes = require('./routes/auth');
+
+// Create uploads directory if it doesn't exist
+if (!fs.existsSync('uploads')) {
+  fs.mkdirSync('uploads');
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,6 +20,7 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/formbu
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '200kb' }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.use('/api/auth', authRoutes);
