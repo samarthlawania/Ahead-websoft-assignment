@@ -1,0 +1,46 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: formbuilder-db
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=formbuilder
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: formbuilder-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/formbuilder
+      - ADMIN_TOKEN=admin-secret-token
+      - JWT_SECRET=your-secret-key
+      - PORT=3000
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      - mongodb
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        - VITE_API_URL=http://localhost:3000/api
+    container_name: formbuilder-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
+  uploads_data:

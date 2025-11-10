@@ -28,12 +28,40 @@ A full-stack application for creating and managing dynamic forms with a React fr
 
 ## Setup Instructions
 
-### Prerequisites
+### Option 1: Docker (Recommended)
+
+#### Prerequisites
+- Docker and Docker Compose installed
+
+#### Quick Start
+```bash
+# Start all services (Backend + Frontend + Database)
+docker-compose up --build -d
+```
+
+#### Individual Services
+```bash
+# Backend + Database only
+docker-compose up --build -d backend mongodb
+
+# Frontend only
+docker-compose up --build -d frontend
+
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+```
+
+### Option 2: Manual Setup
+
+#### Prerequisites
 - Node.js (v22 or higher)
 - MongoDB (running locally or connection string)
 - npm or yarn
 
-### Installation
+#### Installation
 
 1. **Clone and navigate to the project:**
    ```bash
@@ -76,6 +104,13 @@ A full-stack application for creating and managing dynamic forms with a React fr
 
 ### Access the Application
 
+#### Docker Setup
+- **Frontend (Admin & Public)**: http://localhost
+- **Backend API**: http://localhost:3000
+- **Admin Interface**: http://localhost/admin
+- **Public Forms**: http://localhost/forms/{form-id}
+
+#### Manual Setup
 - **Frontend (Admin & Public)**: http://localhost:5173
 - **Backend API**: http://localhost:3000
 - **Admin Interface**: http://localhost:5173/admin
@@ -128,7 +163,29 @@ VITE_API_URL=http://localhost:3000/api
 
 ## Development
 
-### Frontend Development
+### Docker Development
+```bash
+# Start all services in development mode
+docker-compose up --build
+
+# View logs for specific service
+docker-compose logs -f frontend
+docker-compose logs -f backend
+
+# Restart specific service
+docker-compose restart frontend
+docker-compose restart backend
+
+# Stop all services
+docker-compose down
+
+# Reset all data (including database)
+docker-compose down -v
+```
+
+### Manual Development
+
+#### Frontend Development
 ```bash
 cd frontend
 npm run dev          # Start development server
@@ -136,7 +193,7 @@ npm run build        # Build for production
 npm run preview      # Preview production build
 ```
 
-### Backend Development
+#### Backend Development
 ```bash
 cd backend
 npm run dev          # Start with nodemon
