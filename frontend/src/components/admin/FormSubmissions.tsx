@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Download, Filter, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { api, ApiError } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -13,6 +16,12 @@ export const FormSubmissions = () => {
   const [submissions, setSubmissions] = useState([]);
   const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 0 });
+  const [filters, setFilters] = useState({ versions: [] });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedVersion, setSelectedVersion] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -20,15 +29,32 @@ export const FormSubmissions = () => {
     }
   }, [id]);
 
-  const loadData = async () => {
+  const handleSearch = () => {
+    loadData(1);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    loadData(newPage);
+  };
+
+  const loadData = async (page = 1) => {
     try {
       setLoading(true);
       const [formData, submissionsData] = await Promise.all([
         api.admin.getForm(id!),
-        api.admin.getSubmissions(id!, 1, 100)
+        api.admin.getSubmissions(id!, {
+          page,
+          limit: pagination.limit,
+          search: searchTerm,
+          version: selectedVersion && selectedVersion !== 'all' ? parseInt(selectedVersion) : undefined,
+          startDate,
+          endDate
+        })
       ]);
       setForm(formData);
       setSubmissions(submissionsData.submissions || []);
+      setPagination(submissionsData.pagination || { page: 1, limit: 10, total: 0, pages: 0 });
+      setFilters(submissionsData.filters || { versions: [] });
     } catch (error) {
       if (error instanceof ApiError) {
         toast.error(`Failed to load data: ${error.message}`);
@@ -114,22 +140,87 @@ export const FormSubmissions = () => {
               Form Submissions
             </h1>
             <p className="text-muted-foreground">
-              {form?.title} - {submissions.length} submissions
+              {form?.title} - {pagination.total} submissions (v{form?.version})
             </p>
           </div>
-          {submissions.length > 0 && (
-            <Button onClick={exportToCSV} variant="outline">
-              <Download className="mr-2 h-4 w-4" />
-              Export CSV
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {submissions.length > 0 && (
+              <Button onClick={exportToCSV} variant="outline">
+                <Download className="mr-2 h-4 w-4" />
+                Export CSV
+              </Button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="h-5 w-5" />
+            Filters
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <Label htmlFor="search">Search</Label>
+              <Input
+                id="search"
+                placeholder="Search submissions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="version">Form Version</Label>
+              <Select value={selectedVersion} onValueChange={setSelectedVersion}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All versions" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All versions</SelectItem>
+                  {filters.versions.map((version) => (
+                    <SelectItem key={version} value={version.toString()}>
+                      Version {version}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="startDate">Start Date</Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="endDate">End Date</Label>
+              <Input
+                id="endDate"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="mt-4">
+            <Button onClick={handleSearch}>
+              <Filter className="mr-2 h-4 w-4" />
+              Apply Filters
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {submissions.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">No submissions yet</p>
+            <p className="text-muted-foreground">No submissions found</p>
           </CardContent>
         </Card>
       ) : (
@@ -143,7 +234,8 @@ export const FormSubmissions = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Submitted At</TableHead>
-                    {form?.fields.map((field) => {
+                    <TableHead>Version</TableHead>
+                    {form?.fields.flatMap((field) => {
                       const headers = [<TableHead key={field.id}>{field.label}</TableHead>];
                       
                       // Add nested field headers
@@ -169,9 +261,12 @@ export const FormSubmissions = () => {
                   {submissions.map((submission) => (
                     <TableRow key={submission._id}>
                       <TableCell>
-                        {new Date(submission.submittedAt).toLocaleString()}
+                        {new Date(submission.submittedAt).toLocaleDateString('en-GB')}
                       </TableCell>
-                      {form?.fields.map((field) => {
+                      <TableCell>
+                        v{submission.formVersion}
+                      </TableCell>
+                      {form?.fields.flatMap((field) => {
                         const value = submission.answers[field.name];
                         let displayValue = value || "-";
                         
@@ -216,6 +311,36 @@ export const FormSubmissions = () => {
               </Table>
             </div>
           </CardContent>
+          
+          {/* Pagination */}
+          {pagination.pages > 1 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t">
+              <div className="text-sm text-muted-foreground">
+                Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} results
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                  disabled={pagination.page <= 1}
+                >
+                  Previous
+                </Button>
+                <span className="flex items-center px-3 text-sm">
+                  Page {pagination.page} of {pagination.pages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                  disabled={pagination.page >= pagination.pages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </Card>
       )}
     </div>

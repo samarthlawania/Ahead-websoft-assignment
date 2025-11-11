@@ -6,10 +6,10 @@ const upload = require('../middleware/upload');
 
 const router = express.Router();
 
-// GET /api/forms/:id - Get public form
+// GET /api/forms/:id - Get public form (active version only)
 router.get('/forms/:id', async (req, res) => {
   try {
-    const form = await Form.findById(req.params.id);
+    const form = await Form.findOne({ _id: req.params.id, isActive: true });
     if (!form) {
       return res.status(404).json({ error: 'Form not found' });
     }

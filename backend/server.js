@@ -40,12 +40,18 @@ app.use('*', (req, res) => {
 
 async function startServer() {
   try {
-    await mongoose.connect(MONGODB_URI);
-    console.log('Connected to MongoDB');
+    mongoose
+      .connect(MONGODB_URI)
+      .then(() => console.log("✅ MongoDB connected"))
+      .catch((err) => console.error(err));
     
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
+    
+    // Seed default data after server starts
+    const seedData = require('./scripts/seedData');
+    await seedData();
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);

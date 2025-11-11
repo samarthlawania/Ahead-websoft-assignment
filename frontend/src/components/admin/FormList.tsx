@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Edit, Trash2, FileText } from "lucide-react";
+import { Plus, Edit, Trash2, FileText, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,9 +12,11 @@ import {
 import { api, ApiError } from "@/lib/api";
 import { Form } from "@/types/form";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const FormList = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [forms, setForms] = useState<Form[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -59,21 +61,15 @@ export const FormList = () => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-4xl font-bold text-foreground mb-2">Forms</h1>
-          <p className="text-muted-foreground">Manage your dynamic forms</p>
+          <p className="text-muted-foreground">Welcome back, {user?.email}</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => navigate("/admin/forms/new")} size="lg">
             <Plus className="mr-2 h-5 w-5" />
             Create Form
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-              window.location.reload();
-            }}
-          >
+          <Button variant="outline" onClick={logout}>
+            <LogOut className="mr-2 h-4 w-4" />
             Logout
           </Button>
         </div>
@@ -112,7 +108,7 @@ export const FormList = () => {
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>{form.fields.length} fields</span>
+                <span>{form.fields.length} fields • v{form.version}</span>
                 <span>Updated {new Date(form.updatedAt).toLocaleDateString()}</span>
               </div>
               <div className="space-y-2 mt-4">

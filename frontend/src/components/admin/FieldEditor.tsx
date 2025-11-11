@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, GripVertical, Trash2, Edit } from "lucide-react";
 import {
   DragDropContext,
@@ -21,6 +21,11 @@ interface FieldEditorProps {
 export const FieldEditor = ({ fields, setFields, onFieldsChange }: FieldEditorProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingField, setEditingField] = useState<FormField | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
@@ -95,6 +100,52 @@ export const FieldEditor = ({ fields, setFields, onFieldsChange }: FieldEditorPr
         {fields.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             No fields yet. Click "Add Field" to create one.
+          </div>
+        ) : !mounted ? (
+          <div className="space-y-2">
+            {fields
+              .sort((a, b) => a.order - b.order)
+              .map((field) => (
+                <div
+                  key={field.id}
+                  className="flex items-center gap-3 p-4 bg-card border rounded-lg"
+                >
+                  <GripVertical className="h-5 w-5 text-muted-foreground" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium">{field.label}</span>
+                      {field.required && (
+                        <Badge variant="destructive" className="text-xs">
+                          Required
+                        </Badge>
+                      )}
+                      <Badge className={getFieldTypeColor(field.type)}>
+                        {field.type}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Name: {field.name}
+                      {field.options && ` • ${field.options.length} options`}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEditField(field)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDeleteField(field.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
           </div>
         ) : (
           <DragDropContext onDragEnd={handleDragEnd}>

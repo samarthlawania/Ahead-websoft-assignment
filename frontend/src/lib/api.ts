@@ -31,8 +31,8 @@ const getAuthHeaders = () => ({
 export const api = {
   // Auth API calls
   auth: {
-    signup: async (email: string, password: string) => {
-      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+    register: async (email: string, password: string) => {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -40,8 +40,8 @@ export const api = {
       return handleResponse(response);
     },
 
-    signin: async (email: string, password: string) => {
-      const response = await fetch(`${API_BASE_URL}/auth/signin`, {
+    login: async (email: string, password: string) => {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -106,9 +106,23 @@ export const api = {
       }
     },
 
-    // Get form submissions
-    getSubmissions: async (formId: string, page = 1, limit = 10) => {
-      const response = await fetch(`${API_BASE_URL}/admin/forms/${formId}/submissions?page=${page}&limit=${limit}`, {
+    // Get form submissions with filters
+    getSubmissions: async (formId: string, params: {
+      page?: number;
+      limit?: number;
+      startDate?: string;
+      endDate?: string;
+      search?: string;
+      version?: number;
+    } = {}) => {
+      const queryParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          queryParams.append(key, value.toString());
+        }
+      });
+      
+      const response = await fetch(`${API_BASE_URL}/admin/forms/${formId}/submissions?${queryParams}`, {
         headers: getAuthHeaders(),
       });
       return handleResponse(response);

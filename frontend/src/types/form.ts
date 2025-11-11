@@ -40,6 +40,8 @@ export interface Form {
     description: string;
     fields: FormField[];
     version?: number;
+    isActive?: boolean;
+    parentFormId?: string;
     createdAt: Date | string;
     updatedAt: Date | string;
 }

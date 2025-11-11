@@ -44,7 +44,10 @@ const FormSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: String,
   version: { type: Number, default: 1 },
-  fields: [FieldSchema]
+  fields: [FieldSchema],
+  isActive: { type: Boolean, default: true },
+  parentFormId: { type: mongoose.Schema.Types.ObjectId, ref: 'Form' },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 }, {
   timestamps: true
 });
