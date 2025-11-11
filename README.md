@@ -35,7 +35,11 @@ A full-stack application for creating and managing dynamic forms with a React fr
 
 #### Quick Start
 ```bash
-# Start all services (Backend + Frontend + Database)
+# 1. **IMPORTANT: Copy environment files first**
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+
+# 2. Start all services (Backend + Frontend + Database)
 docker-compose up --build -d
 ```
 
@@ -68,13 +72,19 @@ docker-compose down
    cd Ahead-websoft-assignment
    ```
 
-2. **Install Backend Dependencies:**
+2. **IMPORTANT: Setup Environment Files:**
+   ```bash
+   cp backend/.env.example backend/.env
+   cp frontend/.env.example frontend/.env
+   ```
+
+3. **Install Backend Dependencies:**
    ```bash
    cd backend
    npm install
    ```
 
-3. **Install Frontend Dependencies:**
+4. **Install Frontend Dependencies:**
    ```bash
    cd ../frontend
    npm install
@@ -140,17 +150,32 @@ Authorization: Bearer admin-secret-token
 
 ## Environment Variables
 
+**⚠️ CRITICAL: You MUST copy the example environment files before running:**
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
+
 ### Backend (.env)
 ```
 PORT=3000
-MONGODB_URI=mongodb://localhost:27017/formbuilder
-ADMIN_TOKEN=admin-secret-token
+MONGODB_URI=mongodb://mongodb:27017/formbuilder  # For Docker
+# MONGODB_URI=mongodb://localhost:27017/formbuilder  # For local MongoDB
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+NODE_ENV=development
 ```
 
 ### Frontend (.env)
 ```
 VITE_API_URL=http://localhost:3000/api
 ```
+
+## Demo Accounts
+
+After starting the application, you can use these demo accounts:
+- **Email**: admin1@example.com **Password**: password123
+- **Email**: admin2@example.com **Password**: password123
+- **Email**: admin3@example.com **Password**: password123
 
 ## Usage
 
